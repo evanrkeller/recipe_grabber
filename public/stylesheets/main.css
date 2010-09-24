@@ -1,0 +1,22 @@
+body {
+  font-family: Verdana, Arial, Sans-serif;
+  font-size: 12px;
+  background-color: #DDD;
+}
+
+#header, #footer {
+  width: 960px;
+  margin: 0 auto;
+}
+
+#content {
+  width: 930px;
+  padding: 15px;
+  margin: 0 auto;
+  background-color: #FFF;
+}
+
+#footer {
+  padding: 10px 0;
+  text-align: center;
+}

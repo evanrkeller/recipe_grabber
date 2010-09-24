@@ -1,0 +1,25 @@
+!!!
+%html{html_attrs(I18n.locale)}
+  %head
+    %meta(http-equiv='Content-Type' content='text/html;charset=utf-8')
+    %meta(http-equiv='Content-Script-Type' content='text/javascript')
+    - if protect_against_forgery?
+      %meta(name='authenticity_token' content=form_authenticity_token)
+    %title Keller Solutions Recipe Grabber
+    = stylesheet_link_tag 'main'
+  %body
+    #header
+      %h1 Keller Solutions Recipe Grabber
+      %p
+        = link_to 'Home', '/'
+    #flash
+      - flash.each do |name, msg|
+        %div(class=name)= msg
+    #content
+      %h2= @title.inner_text()
+      %ul
+        - @ingredients.each do |ingredient|
+          %li= ingredient.inner_text().gsub(/\s+/, ' ')
+      = @preparation.to_s.gsub(/^\s+/, '')
+    #footer
+      == &copy; #{Date.today.year}, Keller Solutions
