@@ -20,6 +20,8 @@
       %ul
         - @ingredients.each do |ingredient|
           %li= ingredient.inner_text().gsub(/\s+/, ' ')
-      = @preparation.to_s.gsub(/^\s+/, '')
+      Directions
+      - @steps.each do |step|
+        %p= step.inner_text().gsub(/\s+/, ' ')
     #footer
       == &copy; #{Date.today.year}, Keller Solutions
