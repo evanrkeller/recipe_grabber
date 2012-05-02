@@ -19,34 +19,18 @@
       %h2= @title
       %img{:src => @image, :style => 'float: right; margin-left: 20px; border: 2px solid black;'}
       %p= @head_note
-      - unless @yield.blank?
-        %p
-          %strong Yield:
-          = @yield
-      - unless @author.blank?
-        %p
-          %strong Author:
-          = @author
-      - unless @publication.blank?
-        %p
-          %strong Publication:
-          = @publication
-      - unless @published.blank?
-        %p
-          %strong Published:
-          = @published
-      - unless @prep_time.blank?
-        %p
-          %strong Prep Time:
-          = @prep_time
-      - unless @cook_time.blank?
-        %p
-          %strong Cook Time:
-          = @cook_time
-      - unless @total_time.blank?
-        %p
-          %strong Total Time:
-          = @total_time
+      %p
+        %strong Yield:
+        = @yield.blank? ? 'N/A' : @yield
+      %p
+        %strong Prep Time:
+        = @prep_time.blank? ? 'N/A' : @prep_time
+        %br
+        %strong Cook Time:
+        = @cook_time.blank? ? 'N/A' : @cook_time
+        %br
+        %strong Total Time:
+        = @total_time.blank? ? 'N/A' : @total_time
       %h3 Ingredients
       %ul
         - @ingredients.each do |ingredient|
@@ -56,8 +40,19 @@
         %p= step.search("text()").to_s.gsub(/\s+/, ' ').strip
       %h3 Nutritional Analysis
       %p
+        - if @nutritional_analysis.empty?
+          N/A
         - @nutritional_analysis.each do |nutrient|
           = nutrient.search("text()").to_s.gsub(/\s+/, ' ').strip
           %br
+      %p
+        %strong Author:
+        = @author.blank? ? 'N/A' : @author
+        %br
+        %strong Publication:
+        = @publication.blank? ? 'N/A' : @publication
+        %br
+        %strong Published:
+        = @published.blank? ? 'N/A' : @published
     #footer
       == &copy; #{Date.today.year}, Keller Solutions

@@ -14,7 +14,7 @@ class RecipeController < ApplicationController
     @total_time = doc.search("//time[@itemprop='totalTime']/text()").to_s.strip
     @ingredients = doc.search("//div[@class='recipeDetails']/ul/li")
     @steps = doc.search("//div[@class='recipeDetails']/ol/li")
-    @author = doc.search("/div[@class='byline']/p[@class='author']/text()[1]")
+    @author = doc.search("//div[@class='byline']/p[@class='author']/text()")[0].to_s.strip.gsub(/,/, '')
     @publication = doc.search("//div[@class='byline']/p[@class='author']/a//text()").to_s.strip
     @published = doc.search("//div[@class='byline']/p[@class='author']/span[@itemprop='published']/text()").to_s.strip.capitalize
     @nutritional_analysis = doc.search("//ul[@itemprop='nutrition']/li")
