@@ -16,43 +16,46 @@
       - flash.each do |name, msg|
         %div(class=name)= msg
     #content
-      %h2= @title
-      %img{:src => @image, :style => 'float: right; margin-left: 20px; border: 2px solid black;'}
-      %p= @head_note
-      %p
-        %strong Yield:
-        = @yield.blank? ? 'N/A' : @yield
-      %p
-        %strong Prep Time:
-        = @prep_time.blank? ? 'N/A' : @prep_time
-        %br
-        %strong Cook Time:
-        = @cook_time.blank? ? 'N/A' : @cook_time
-        %br
-        %strong Total Time:
-        = @total_time.blank? ? 'N/A' : @total_time
-      %h3 Ingredients
-      %ul
-        - @ingredients.each do |ingredient|
-          %li= ingredient.search("text()").to_s.gsub(/\s+/, ' ').strip
-      %h3 Directions
-      - @steps.each do |step|
-        %p= step.search("text()").to_s.gsub(/\s+/, ' ').strip
-      %h3 Nutritional Analysis
-      %p
-        - if @nutritional_analysis.empty?
-          N/A
-        - @nutritional_analysis.each do |nutrient|
-          = nutrient.search("text()").to_s.gsub(/\s+/, ' ').strip
+      - @recipes.each do |recipe|
+        %h2= recipe[:title]
+        %img{:src => recipe[:image], :style => 'float: right; margin-left: 20px; border: 2px solid black;'}
+        %p= recipe[:head_note]
+        %p
+          %strong Yield:
+          = recipe[:yield].blank? ? 'N/A' : recipe[:yield]
+        %p
+          %strong Prep Time:
+          = recipe[:prep_time].blank? ? 'N/A' : recipe[:prep_time]
           %br
-      %p
-        %strong Author:
-        = @author.blank? ? 'N/A' : @author
-        %br
-        %strong Publication:
-        = @publication.blank? ? 'N/A' : @publication
-        %br
-        %strong Published:
-        = @published.blank? ? 'N/A' : @published
+          %strong Cook Time:
+          = recipe[:cook_time].blank? ? 'N/A' : recipe[:cook_time]
+          %br
+          %strong Total Time:
+          = recipe[:total_time].blank? ? 'N/A' : recipe[:total_time]
+        %h3 Ingredients
+        %ul
+          - recipe[:ingredients].each do |ingredient|
+            %li= ingredient.search("text()").to_s.gsub(/\s+/, ' ').strip
+        %h3 Directions
+        - recipe[:steps].each do |step|
+          %p= step.search("text()").to_s.gsub(/\s+/, ' ').strip
+        %h3 Nutritional Analysis
+        %p
+          - if recipe[:nutritional_analysis].empty?
+            N/A
+          - recipe[:nutritional_analysis].each do |nutrient|
+            = nutrient.search("text()").to_s.gsub(/\s+/, ' ').strip
+            %br
+        %p
+          %strong Author:
+          = recipe[:author].blank? ? 'N/A' : recipe[:author]
+          %br
+          %strong Publication:
+          = recipe[:publication].blank? ? 'N/A' : recipe[:publication]
+          %br
+          %strong Published:
+          = recipe[:published].blank? ? 'N/A' : recipe[:published]
+        - unless recipe == @recipes.last
+          %hr
     #footer
       == &copy; #{Date.today.year}, Keller Solutions
