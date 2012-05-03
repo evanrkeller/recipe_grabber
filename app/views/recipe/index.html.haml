@@ -17,8 +17,8 @@
         %div(class=name)= msg
     #content
       - @recipes.each do |recipe|
+        %img{:src => recipe[:image].sub("-l.jpg", "-m.jpg"), :style => 'border: 2px solid black;'}
         %h2= recipe[:title]
-        %img{:src => recipe[:image], :style => 'float: right; margin-left: 20px; border: 2px solid black;'}
         %p= recipe[:head_note]
         %p
           %strong Yield:
