@@ -125,17 +125,24 @@ class RecipeParser
       end
     end
 
+    # Keeps the source order: each HowToSection becomes its own section, and
+    # each run of loose steps between sections becomes an unnamed one.
     def instructions(value)
       value = value.split("\n") if value.is_a?(String)
-      items = Array.wrap(value)
-      sections, loose = items.partition { |item| item.is_a?(Hash) && type?(item, "HowToSection") }
+      groups = Array.wrap(value).chunk_while { |a, b| !section?(a) && !section?(b) }
 
-      result = []
-      result << Recipe::Section.new(name: nil, steps: steps(loose)) if loose.any?
-      sections.each do |section|
-        result << Recipe::Section.new(name: text(section["name"]), steps: steps(Array.wrap(section["itemListElement"])))
+      groups.filter_map do |group|
+        section = if section?(group.first)
+          Recipe::Section.new(name: text(group.first["name"]), steps: steps(Array.wrap(group.first["itemListElement"])))
+        else
+          Recipe::Section.new(name: nil, steps: steps(group))
+        end
+        section if section.steps.any?
       end
-      result.reject { |section| section.steps.empty? }
+    end
+
+    def section?(item)
+      item.is_a?(Hash) && type?(item, "HowToSection")
     end
 
     def steps(items)

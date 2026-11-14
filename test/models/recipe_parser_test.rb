@@ -125,6 +125,24 @@ class RecipeParserTest < ActiveSupport::TestCase
     assert_equal "Gruel", RecipeParser.new(full_url_type, source_url: "https://example.test").recipe.title
   end
 
+  test "keeps loose steps and sections in their original order and drops empty sections" do
+    html = <<~HTML
+      <script type="application/ld+json">
+      {"@type":"Recipe","name":"Soup","recipeInstructions":[
+        {"@type":"HowToStep","text":"Preheat the pot."},
+        {"@type":"HowToSection","name":"Cook","itemListElement":[{"@type":"HowToStep","text":"Simmer."}]},
+        {"@type":"HowToStep","text":"Serve."},
+        {"@type":"HowToStep","text":"Garnish."},
+        {"@type":"HowToSection","name":"Notes","itemListElement":[]}]}
+      </script>
+    HTML
+
+    sections = RecipeParser.new(html, source_url: "https://example.test").recipe.instructions
+
+    assert_equal [ nil, "Cook", nil ], sections.map(&:name)
+    assert_equal [ [ "Preheat the pot." ], [ "Simmer." ], [ "Serve.", "Garnish." ] ], sections.map(&:steps)
+  end
+
   test "has no instructions when the recipe provides none" do
     html = %(<script type="application/ld+json">{"@type":"Recipe","name":"Mystery"}</script>)
 

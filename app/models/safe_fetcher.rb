@@ -23,7 +23,7 @@ class SafeFetcher
     0.0.0.0/8 10.0.0.0/8 100.64.0.0/10 127.0.0.0/8 169.254.0.0/16 172.16.0.0/12
     192.0.0.0/24 192.0.2.0/24 192.168.0.0/16 198.18.0.0/15 198.51.100.0/24
     203.0.113.0/24 224.0.0.0/4 240.0.0.0/4
-    ::/96 64:ff9b::/96 64:ff9b:1::/48 100::/64 2001:db8::/32 fc00::/7 fe80::/10 ff00::/8
+    ::/96 64:ff9b::/96 64:ff9b:1::/48 100::/64 2001:db8::/32 fc00::/7 fe80::/10 fec0::/10 ff00::/8
   ].map { |range| IPAddr.new(range) }.freeze
 
   mattr_accessor :resolver, default: ->(host) {
@@ -35,17 +35,19 @@ class SafeFetcher
     new.fetch(url)
   end
 
-  # One deadline covers every redirect hop, so a chain of slow responses
-  # can't hold a server thread much past total_timeout.
+  # One wall-clock limit covers DNS, connecting, headers, body, and every
+  # redirect hop. Net::HTTP's own timeouts are idle timeouts, so a server
+  # trickling bytes could otherwise hold a request thread indefinitely.
   def fetch(url)
     uri = parse(url)
-    deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + total_timeout
-    MAX_REDIRECTS.downto(0) do |redirects_left|
-      body, location = get(uri, resolve(uri.hostname), deadline)
-      return body unless location
-      raise FetchFailed, "too many redirects" if redirects_left.zero?
+    Timeout.timeout(total_timeout, FetchFailed, "took too long") do
+      MAX_REDIRECTS.downto(0) do |redirects_left|
+        body, location = get(uri, resolve(uri.hostname))
+        return body unless location
+        raise FetchFailed, "too many redirects" if redirects_left.zero?
 
-      uri = redirect_target(uri, location)
+        uri = redirect_target(uri, location)
+      end
     end
   end
 
@@ -82,7 +84,7 @@ class SafeFetcher
     end
 
     # Returns [body, nil] for a page, or [nil, location] for a redirect.
-    def get(uri, ip_address, deadline)
+    def get(uri, ip_address)
       # A nil proxy stops Net::HTTP from honoring http_proxy, which would
       # re-resolve the hostname and bypass the address checked above.
       http = Net::HTTP.new(uri.hostname, uri.port, nil)
@@ -92,13 +94,13 @@ class SafeFetcher
       http.max_retries = 0
 
       request = Net::HTTP::Get.new(uri, "User-Agent" => USER_AGENT, "Accept" => "text/html,application/xhtml+xml")
-      http.start { http.request(request) { |response| return read(response, deadline) } }
+      http.start { http.request(request) { |response| return read(response) } }
     rescue Timeout::Error, SystemCallError, SocketError, IOError, OpenSSL::SSL::SSLError, Zlib::Error,
            Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => error
       raise FetchFailed, error.message
     end
 
-    def read(response, deadline)
+    def read(response)
       case response
       when Net::HTTPRedirection
         location = response["location"]
@@ -106,20 +108,19 @@ class SafeFetcher
 
         [ nil, location ]
       when Net::HTTPSuccess
-        [ read_body(response, deadline), nil ]
+        [ read_body(response), nil ]
       else
         raise FetchFailed, "HTTP #{response.code}"
       end
     end
 
-    def read_body(response, deadline)
+    def read_body(response)
       raise FetchFailed, "page too large" if response.content_length.to_i > MAX_BYTES
 
       body = +""
       response.read_body do |chunk|
         body << chunk
         raise FetchFailed, "page too large" if body.bytesize > MAX_BYTES
-        raise FetchFailed, "took too long" if Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
       end
       body
     end

@@ -75,6 +75,14 @@ class GrabRecipesTest < ActionDispatch::IntegrationTest
     assert_select "hr", 2
   end
 
+  test "keeps pasted links out of the request logs" do
+    stub_request(:get, "https://food.example.test/pancakes?token=secret").to_return(status: 200, body: recipe_fixture("plain_recipe"))
+    get recipes_path, params: { recipe_url: "https://food.example.test/pancakes?token=secret" }
+
+    assert_includes request.filtered_path, "recipe_url=[FILTERED]"
+    assert_not_includes request.filtered_path, "secret"
+  end
+
   test "links each recipe back to its original page and keeps results out of search engines" do
     get recipes_path, params: { recipe_url: "https://food.example.test/pancakes" }
 

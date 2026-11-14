@@ -31,7 +31,7 @@ class SafeFetcherTest < ActiveSupport::TestCase
     %w[
       http://127.0.0.1/ http://localhost.internal.test/ http://10.0.0.5/ http://172.16.3.4/
       http://169.254.169.254/latest/meta-data http://0.0.0.0/ http://100.64.0.1/ http://224.0.0.1/
-      http://[::1]/ http://[::ffff:127.0.0.1]/ http://[::7f00:1]/ http://[fe80::1]/ http://[fd00::1]/ http://[::]/
+      http://[::1]/ http://[::ffff:127.0.0.1]/ http://[::7f00:1]/ http://[fe80::1]/ http://[fec0::1]/ http://[fd00::1]/ http://[::]/
     ].each do |url|
       SafeFetcher.resolver = ->(host) { host.end_with?(".internal.test") ? [ "192.168.1.10" ] : [ host ] }
       assert_raises(SafeFetcher::DisallowedAddress, url) { SafeFetcher.fetch(url) }
@@ -107,11 +107,19 @@ class SafeFetcherTest < ActiveSupport::TestCase
     assert_raises(SafeFetcher::FetchFailed) { SafeFetcher.fetch("http://recipes.example.test/streamed") }
   end
 
-  test "fails when a download runs past the overall time limit" do
-    SafeFetcher.total_timeout = -1
-    stub_request(:get, "http://recipes.example.test/drip").to_return(status: 200, body: "slow")
+  test "fails when the whole fetch, headers and redirects included, runs past the overall time limit" do
+    SafeFetcher.total_timeout = 0.1
+    stub_request(:get, "http://recipes.example.test/drip").to_return(lambda { |_request|
+      sleep 0.3
+      { status: 200, body: "" }
+    })
+    stub_request(:get, "http://recipes.example.test/hop").to_return(lambda { |_request|
+      sleep 0.06
+      { status: 302, headers: { "Location" => "/hop" } }
+    })
 
     assert_raises(SafeFetcher::FetchFailed) { SafeFetcher.fetch("http://recipes.example.test/drip") }
+    assert_raises(SafeFetcher::FetchFailed) { SafeFetcher.fetch("http://recipes.example.test/hop") }
   end
 
   test "fails when the host does not resolve" do
