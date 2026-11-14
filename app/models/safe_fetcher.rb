@@ -63,7 +63,7 @@ class SafeFetcher
 
     def redirect_target(uri, location)
       parse(URI.join(uri, location).to_s)
-    rescue URI::Error
+    rescue URI::Error, InvalidUrl
       raise FetchFailed, "unusable redirect location"
     end
 

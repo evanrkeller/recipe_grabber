@@ -33,11 +33,31 @@ class RecipeParser
 
   private
     def find_recipe_node
-      Nokogiri::HTML(@html).css(JSON_LD_SELECTOR).each do |script|
-        node = recipe_in(parse_json(script.text))
+      documents = Nokogiri::HTML(@html).css(JSON_LD_SELECTOR).map { |script| parse_json(script.text) }
+      @nodes_by_id = index_by_id(documents)
+      documents.each do |document|
+        node = recipe_in(document)
         return node if node
       end
       nil
+    end
+
+    # Every object on the page with an @id, so references like
+    # {"@id": "#author"} can be followed without fetching anything.
+    def index_by_id(value, index = {})
+      case value
+      when Array then value.each { |item| index_by_id(item, index) }
+      when Hash
+        index[value["@id"]] ||= value if value["@id"].is_a?(String) && value.keys.size > 1
+        value.each_value { |item| index_by_id(item, index) }
+      end
+      index
+    end
+
+    def dereference(value)
+      return value unless value.is_a?(Hash) && value["@id"] && (value.keys - %w[@id @type]).empty?
+
+      @nodes_by_id.fetch(value["@id"], value)
     end
 
     # Some sites leave raw newlines and tabs inside JSON strings, which strict
@@ -84,13 +104,24 @@ class RecipeParser
     end
 
     def image_url(value)
+      value = dereference(value)
       url = case value
       when Array then return image_url(value.first)
       when Hash then value["url"] || value["contentUrl"]
       else value
       end
-      url = url.to_s.strip
-      url if url.match?(%r{\Ahttps?://}i)
+      absolute_http_url(url.to_s.strip)
+    end
+
+    # Resolves "/images/pie.jpg" and "//cdn.example/pie.jpg" against the
+    # recipe page, then allows only http(s) results.
+    def absolute_http_url(url)
+      return if url.empty?
+
+      resolved = URI.join(@source_url, url)
+      resolved.to_s if resolved.is_a?(URI::HTTP) && resolved.host.present?
+    rescue URI::Error
+      nil
     end
 
     # Sites often give both a bare count and a phrase ("6", "6 servings");
@@ -100,8 +131,10 @@ class RecipeParser
       values.find { |item| item.match?(/[[:alpha:]]/) } || values.first
     end
 
+    # An absurd value like "PT999...9.0H" parses to infinity, which can't be displayed.
     def duration(value)
-      ActiveSupport::Duration.parse(value.to_s.strip)
+      parsed = ActiveSupport::Duration.parse(value.to_s.strip)
+      parsed if parsed.value.finite?
     rescue ActiveSupport::Duration::ISO8601Parser::ParsingError
       nil
     end
@@ -113,7 +146,7 @@ class RecipeParser
     end
 
     def names(value)
-      list(Array.wrap(value).map { |item| item.is_a?(Hash) ? item["name"] : item }).join(", ").presence
+      list(Array.wrap(value).map { |item| (item = dereference(item)).is_a?(Hash) ? item["name"] : item }).join(", ").presence
     end
 
     def nutrition(value)

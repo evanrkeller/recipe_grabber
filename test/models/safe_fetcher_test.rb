@@ -57,6 +57,35 @@ class SafeFetcherTest < ActiveSupport::TestCase
     assert_raises(SafeFetcher::DisallowedAddress) { SafeFetcher.fetch("http://recipes.example.test/sneaky") }
   end
 
+  test "treats a redirect to a non-web address as unreachable, not as a bad link" do
+    stub_request(:get, "http://recipes.example.test/ftp").to_return(status: 302, headers: { "Location" => "ftp://example.test/recipe" })
+
+    assert_raises(SafeFetcher::FetchFailed) { SafeFetcher.fetch("http://recipes.example.test/ftp") }
+  end
+
+  test "connects to the checked address with no proxy, including after a redirect" do
+    connections = []
+    spy = Module.new do
+      define_method(:request) do |*args, &block|
+        connections << [ address, instance_variable_get(:@ipaddr), proxy? ]
+        super(*args, &block)
+      end
+    end
+    Net::HTTP.prepend(spy)
+    SafeFetcher.resolver = ->(host) { host == "cdn.example.test" ? [ "93.184.216.35" ] : [ PUBLIC_IP ] }
+    stub_request(:get, "http://recipes.example.test/start").to_return(status: 301, headers: { "Location" => "http://cdn.example.test/pie" })
+    stub_request(:get, "http://cdn.example.test/pie").to_return(status: 200, body: "pie")
+    original_proxy = ENV["http_proxy"]
+    ENV["http_proxy"] = "http://10.0.0.1:3128"
+
+    SafeFetcher.fetch("http://recipes.example.test/start")
+
+    assert_equal [ [ "recipes.example.test", PUBLIC_IP, false ], [ "cdn.example.test", "93.184.216.35", false ] ], connections
+  ensure
+    ENV["http_proxy"] = original_proxy
+    spy&.send(:define_method, :request) { |*args, &block| super(*args, &block) }
+  end
+
   test "gives up after three redirects or a redirect without a location" do
     stub_request(:get, %r{http://loop.example.test/\d}).to_return do |request|
       { status: 302, headers: { "Location" => "/#{request.uri.path[1..].to_i + 1}" } }
@@ -86,16 +115,6 @@ class SafeFetcherTest < ActiveSupport::TestCase
     %w[bad-redirect bad-length bad-gzip].each do |path|
       assert_raises(SafeFetcher::FetchFailed, path) { SafeFetcher.fetch("http://recipes.example.test/#{path}") }
     end
-  end
-
-  test "ignores proxy settings from the environment so the checked address is the one used" do
-    stub_request(:get, "http://recipes.example.test/pie").to_return(status: 200, body: "pie")
-    original = ENV["http_proxy"]
-    ENV["http_proxy"] = "http://10.0.0.1:3128"
-
-    assert_equal "pie", SafeFetcher.fetch("http://recipes.example.test/pie")
-  ensure
-    ENV["http_proxy"] = original
   end
 
   test "fails on pages over the size limit, whether declared or streamed" do

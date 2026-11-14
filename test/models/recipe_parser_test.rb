@@ -143,6 +143,41 @@ class RecipeParserTest < ActiveSupport::TestCase
     assert_equal [ [ "Preheat the pot." ], [ "Simmer." ], [ "Serve.", "Garnish." ] ], sections.map(&:steps)
   end
 
+  test "resolves relative image URLs against the recipe page" do
+    page = ->(image) { %(<script type="application/ld+json">{"@type":"Recipe","name":"Pie","image":#{image.to_json}}</script>) }
+
+    assert_equal "https://blog.example.test/images/pie.jpg",
+      RecipeParser.new(page.("/images/pie.jpg"), source_url: "https://blog.example.test/recipes/pie").recipe.image_url
+    assert_equal "https://cdn.example.test/pie.jpg",
+      RecipeParser.new(page.("//cdn.example.test/pie.jpg"), source_url: "https://blog.example.test/recipes/pie").recipe.image_url
+    assert_nil RecipeParser.new(page.("http://exa mple.test/pie.jpg"), source_url: "https://blog.example.test/recipes/pie").recipe.image_url
+  end
+
+  test "treats impossibly long durations as missing" do
+    html = %(<script type="application/ld+json">{"@type":"Recipe","name":"Forever","totalTime":"PT#{"9" * 400}.0H"}</script>)
+
+    assert_nil RecipeParser.new(html, source_url: "https://example.test").recipe.total_time
+  end
+
+  test "follows @id references to other nodes in the page for credits and images" do
+    html = <<~HTML
+      <script type="application/ld+json">
+      {"@context":"https://schema.org","@graph":[
+        {"@type":"Recipe","name":"Stew","author":{"@id":"#author"},"publisher":{"@id":"https://blog.example.test/#org"},
+         "image":{"@id":"#photo"}},
+        {"@type":"Person","@id":"#author","name":"Robin Example"},
+        {"@type":"ImageObject","@id":"#photo","url":"https://blog.example.test/stew.jpg"}]}
+      </script>
+      <script type="application/ld+json">{"@type":"Organization","@id":"https://blog.example.test/#org","name":"Example Kitchen"}</script>
+    HTML
+
+    recipe = RecipeParser.new(html, source_url: "https://blog.example.test/stew").recipe
+
+    assert_equal "Robin Example", recipe.author
+    assert_equal "Example Kitchen", recipe.publisher
+    assert_equal "https://blog.example.test/stew.jpg", recipe.image_url
+  end
+
   test "has no instructions when the recipe provides none" do
     html = %(<script type="application/ld+json">{"@type":"Recipe","name":"Mystery"}</script>)
 
