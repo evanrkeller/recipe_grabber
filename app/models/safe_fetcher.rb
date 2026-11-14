@@ -49,11 +49,11 @@ class SafeFetcher
   private
     def parse(url)
       uri = URI.parse(url.to_s.strip)
-      raise InvalidUrl, url unless uri.is_a?(URI::HTTP) && uri.hostname.present?
+      raise InvalidUrl, "not an http(s) URL" unless uri.is_a?(URI::HTTP) && uri.hostname.present?
 
       uri
     rescue URI::InvalidURIError
-      raise InvalidUrl, url
+      raise InvalidUrl, "not an http(s) URL"
     end
 
     def resolve(host)

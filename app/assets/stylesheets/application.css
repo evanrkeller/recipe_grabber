@@ -40,75 +40,11 @@ body {
 
 main,
 .site-header,
-.start-over {
-  margin: 0 0 1.5rem;
-  font-family: system-ui, sans-serif;
-}
-
-.recipe h2 {
-  margin: 1rem 0 0.25rem;
-  font-size: 1.6rem;
-  line-height: 1.25;
-}
-
-.recipe h3 {
-  margin: 1.75rem 0 0.5rem;
-  font-size: 1.15rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.recipe h4 {
-  margin: 1rem 0 0.25rem;
-  font-size: 1rem;
-}
-
-.recipe-photo {
-  display: block;
-  width: 100%;
-  max-width: 28rem;
-  height: auto;
-  border-radius: 6px;
-}
-
-.facts {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 0.15rem 0.75rem;
-  margin: 1rem 0;
-  font-family: system-ui, sans-serif;
-  font-size: 0.95rem;
-}
-
-.facts dt {
-  font-weight: bold;
-}
-
-.facts dd {
-  margin: 0;
-}
-
-.ingredients li,
-.directions li {
-  margin-bottom: 0.35rem;
-}
-
-.recipe hr,
-main > hr {
-  margin: 3rem 0;
-  border: 0;
-  border-top: 2px solid var(--rule);
-}
-
-.source {
-  margin-top: 1.5rem;
-  font-family: system-ui, sans-serif;
-}
-
 .site-footer {
   max-width: 44rem;
   margin: 0 auto;
   padding: 0 1rem;
+  overflow-wrap: break-word;
 }
 
 .site-header h1 {
@@ -163,6 +99,29 @@ textarea:focus-visible {
   color: var(--accent-ink);
   font: bold 1rem/1.2 system-ui, sans-serif;
   cursor: pointer;
+}
+
+.flash-alert,
+.grab-error {
+  padding: 0.75rem 1rem;
+  border-left: 4px solid var(--error-ink);
+  border-radius: 4px;
+  background: var(--error-bg);
+  color: var(--error-ink);
+  font-family: system-ui, sans-serif;
+}
+
+.grab-error p {
+  margin: 0;
+}
+
+.grab-error-message {
+  font-weight: bold;
+}
+
+.grab-error-link {
+  overflow-wrap: anywhere;
+  font: 0.9rem/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 .start-over {

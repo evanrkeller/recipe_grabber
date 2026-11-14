@@ -3,7 +3,7 @@
 
   <%= form_with url: recipes_path, method: :get, local: true, class: "grab-form" do |form| %>
     <%= form.label :recipe_url, t(".recipe_links") %>
-    <%= form.text_area :recipe_url, rows: 8, spellcheck: false, autocapitalize: "off",
+    <%= form.text_area :recipe_url, value: @recipe_url, rows: 8, spellcheck: false, autocapitalize: "off",
           placeholder: "https://www.example.com/recipes/lemon-pancakes" %>
     <%= form.button t(".grab_it"), type: :submit, name: nil %>
   <% end %>

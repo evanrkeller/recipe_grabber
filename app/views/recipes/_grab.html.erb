@@ -1,0 +1,8 @@
+<% if grab.recipe %>
+  <%= render "recipe", recipe: grab.recipe %>
+<% else %>
+  <article class="grab-error">
+    <p class="grab-error-message"><%= t("recipes.errors.#{grab.error}") %></p>
+    <p class="grab-error-link"><%= grab.url %></p>
+  </article>
+<% end %>

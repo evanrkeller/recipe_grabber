@@ -1,8 +1,8 @@
 <article class="recipe">
   <% if recipe.image_url %>
-    <%= image_tag recipe.image_url, alt: recipe.title, class: "recipe-photo", referrerpolicy: "no-referrer" %>
+    <%= image_tag recipe.image_url, alt: recipe.title.to_s, class: "recipe-photo", referrerpolicy: "no-referrer" %>
   <% end %>
-  <h2><%= recipe.title %></h2>
+  <h2><%= recipe.title || t(".untitled") %></h2>
   <% if recipe.description %>
     <p><%= recipe.description %></p>
   <% end %>

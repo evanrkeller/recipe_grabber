@@ -7,6 +7,7 @@ All notable changes to this project are documented here. The format follows [Kee
 ### Added
 
 - Grab recipes from any site that publishes schema.org recipe data, several links at a time, with N/A for missing details (#3)
+- Plain-language message for each link that can't be grabbed, while the rest still display; limits of 1 to 10 links per grab (#4)
 
 ### Changed
 

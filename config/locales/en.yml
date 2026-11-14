@@ -4,6 +4,11 @@ en:
     footer: "© %{year} Keller Solutions"
   recipes:
     not_available: "N/A"
+    errors:
+      invalid_url: "That doesn't look like a web address."
+      disallowed_address: "That address isn't allowed."
+      unreachable: "We couldn't reach that page."
+      no_recipe: "We couldn't find a recipe on that page."
     duration:
       days:
         one: "%{count} day"
@@ -17,7 +22,10 @@ en:
     index:
       title: "Your recipes"
       grab_more: "Grab more recipes"
+      empty: "Paste at least one recipe link."
+      too_many: "You can grab up to %{count} recipes at a time."
     recipe:
+      untitled: "Untitled recipe"
       yield: "Yield:"
       prep_time: "Prep Time:"
       cook_time: "Cook Time:"

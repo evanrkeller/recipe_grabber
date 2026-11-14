@@ -19,6 +19,9 @@
     </header>
 
     <main>
+      <% if alert %>
+        <p class="flash-alert" role="alert"><%= alert %></p>
+      <% end %>
       <%= yield %>
     </main>
 

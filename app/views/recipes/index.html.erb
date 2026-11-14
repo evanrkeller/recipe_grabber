@@ -5,4 +5,4 @@
 
 <p class="start-over"><%= link_to t(".grab_more"), root_path %></p>
 
-<%= render partial: "recipe", collection: @results.map(&:recipe), spacer_template: "divider" %>
+<%= render partial: "grab", collection: @grabs, spacer_template: "divider" %>
