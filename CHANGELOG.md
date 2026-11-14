@@ -4,9 +4,17 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+### Added
+
+- Grab recipes from any site that publishes schema.org recipe data, several links at a time, with N/A for missing details (#3)
+
 ### Changed
 
 - Rebuilt on Ruby 4.0.9 and Rails 8.1 with a responsive, keyboard-accessible home page (#2)
+
+### Security
+
+- Recipe links are fetched only over http(s) from public addresses, with redirect re-checks, timeouts, and a 2 MB cap; the legacy `Kernel#open` command-injection hole is gone (#3)
 
 ### Removed
 

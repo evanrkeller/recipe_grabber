@@ -1,0 +1,67 @@
+<article class="recipe">
+  <% if recipe.image_url %>
+    <%= image_tag recipe.image_url, alt: recipe.title, class: "recipe-photo", referrerpolicy: "no-referrer" %>
+  <% end %>
+  <h2><%= recipe.title %></h2>
+  <% if recipe.description %>
+    <p><%= recipe.description %></p>
+  <% end %>
+
+  <dl class="facts">
+    <dt><%= t(".yield") %></dt><dd><%= value_or_not_available(recipe.yield) %></dd>
+    <dt><%= t(".prep_time") %></dt><dd><%= value_or_not_available(duration_in_words(recipe.prep_time)) %></dd>
+    <dt><%= t(".cook_time") %></dt><dd><%= value_or_not_available(duration_in_words(recipe.cook_time)) %></dd>
+    <dt><%= t(".total_time") %></dt><dd><%= value_or_not_available(duration_in_words(recipe.total_time)) %></dd>
+  </dl>
+
+  <section>
+    <h3><%= t(".ingredients") %></h3>
+    <% if recipe.ingredients.any? %>
+      <ul class="ingredients">
+        <% recipe.ingredients.each do |ingredient| %>
+          <li><%= ingredient %></li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p><%= t("recipes.not_available") %></p>
+    <% end %>
+  </section>
+
+  <section>
+    <h3><%= t(".directions") %></h3>
+    <% recipe.instructions.each do |section| %>
+      <% if section.name %>
+        <h4><%= section.name %></h4>
+      <% end %>
+      <ol class="directions">
+        <% section.steps.each do |step| %>
+          <li><%= step %></li>
+        <% end %>
+      </ol>
+    <% end %>
+    <% if recipe.instructions.empty? %>
+      <p><%= t("recipes.not_available") %></p>
+    <% end %>
+  </section>
+
+  <section class="nutrition">
+    <h3><%= t(".nutrition") %></h3>
+    <% if recipe.nutrition.any? %>
+      <ul class="nutrition">
+        <% recipe.nutrition.each do |fact| %>
+          <li><%= fact %></li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p><%= t("recipes.not_available") %></p>
+    <% end %>
+  </section>
+
+  <dl class="facts credits">
+    <dt><%= t(".author") %></dt><dd><%= value_or_not_available(recipe.author) %></dd>
+    <dt><%= t(".publication") %></dt><dd><%= value_or_not_available(recipe.publisher) %></dd>
+    <dt><%= t(".published") %></dt><dd><%= value_or_not_available(recipe.published_on && l(recipe.published_on, format: :long)) %></dd>
+  </dl>
+
+  <p class="source"><%= link_to t(".view_original"), recipe.source_url, rel: "noopener noreferrer nofollow" %></p>
+</article>

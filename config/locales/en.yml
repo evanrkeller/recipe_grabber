@@ -3,7 +3,29 @@ en:
     name: "Keller Solutions Recipe Grabber"
     footer: "© %{year} Keller Solutions"
   recipes:
+    not_available: "N/A"
+    duration:
+      days:
+        one: "%{count} day"
+        other: "%{count} days"
+      hours: "%{count} hr"
+      minutes: "%{count} min"
     new:
       intro: "Paste links to recipes from almost any recipe site, one per line, and Recipe Grabber pulls out a clean copy of each."
       recipe_links: "Recipe links"
       grab_it: "Grab It"
+    index:
+      title: "Your recipes"
+      grab_more: "Grab more recipes"
+    recipe:
+      yield: "Yield:"
+      prep_time: "Prep Time:"
+      cook_time: "Cook Time:"
+      total_time: "Total Time:"
+      ingredients: "Ingredients"
+      directions: "Directions"
+      nutrition: "Nutrition"
+      author: "Author:"
+      publication: "Publication:"
+      published: "Published:"
+      view_original: "View original recipe"

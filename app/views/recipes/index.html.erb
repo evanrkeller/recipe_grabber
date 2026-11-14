@@ -1,0 +1,8 @@
+<% content_for :title, t(".title") %>
+<% content_for :head do %>
+  <meta name="robots" content="noindex">
+<% end %>
+
+<p class="start-over"><%= link_to t(".grab_more"), root_path %></p>
+
+<%= render partial: "recipe", collection: @results.map(&:recipe), spacer_template: "divider" %>
