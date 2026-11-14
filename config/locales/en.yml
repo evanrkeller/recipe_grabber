@@ -1,5 +1,9 @@
-# Sample localization file for English. Add more files in this directory for other locales.
-# See http://github.com/svenfuchs/rails-i18n/tree/master/rails%2Flocale for starting points.
-
 en:
-  hello: "Hello world"
+  app:
+    name: "Keller Solutions Recipe Grabber"
+    footer: "© %{year} Keller Solutions"
+  recipes:
+    new:
+      intro: "Paste links to recipes from almost any recipe site, one per line, and Recipe Grabber pulls out a clean copy of each."
+      recipe_links: "Recipe links"
+      grab_it: "Grab It"

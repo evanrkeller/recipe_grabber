@@ -1,0 +1,108 @@
+:root {
+  --ink: #1f2328;
+  --muted: #57606a;
+  --paper: #fbfaf7;
+  --card: #ffffff;
+  --rule: #d8d4cc;
+  --accent: #9a3412;
+  --accent-ink: #ffffff;
+  --error-bg: #fdecea;
+  --error-ink: #8a1c12;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #e6e2da;
+    --muted: #a8a29a;
+    --paper: #171512;
+    --card: #211e1a;
+    --rule: #3b362f;
+    --accent: #f0915d;
+    --accent-ink: #1b120c;
+    --error-bg: #3a1d19;
+    --error-ink: #ffb4a8;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 1.0625rem/1.6 Georgia, "Iowan Old Style", "Times New Roman", serif;
+}
+
+main,
+.site-header,
+.site-footer {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.site-header h1 {
+  margin: 2rem 0 1rem;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  line-height: 1.2;
+}
+
+.site-header a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a {
+  color: var(--accent);
+}
+
+a:focus-visible,
+button:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.grab-form {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.grab-form label {
+  font-weight: bold;
+}
+
+.grab-form textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--ink);
+  font: 0.95rem/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.grab-form button {
+  justify-self: start;
+  padding: 0.6rem 1.5rem;
+  border: 0;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font: bold 1rem/1.2 system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.site-footer {
+  margin-top: 3rem;
+  padding-bottom: 2rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
