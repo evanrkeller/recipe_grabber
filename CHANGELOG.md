@@ -16,6 +16,7 @@ All notable changes to this project are documented here. The format follows [Kee
 ### Security
 
 - Recipe links are fetched only over http(s) from public addresses, with redirect re-checks, timeouts, and a 2 MB cap; the legacy `Kernel#open` command-injection hole is gone (#3)
+- One deadline covers every redirect hop, environment proxies are ignored, and grabs are limited to 10 per minute per visitor (#4)
 
 ### Removed
 

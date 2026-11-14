@@ -31,7 +31,7 @@ class SafeFetcherTest < ActiveSupport::TestCase
     %w[
       http://127.0.0.1/ http://localhost.internal.test/ http://10.0.0.5/ http://172.16.3.4/
       http://169.254.169.254/latest/meta-data http://0.0.0.0/ http://100.64.0.1/ http://224.0.0.1/
-      http://[::1]/ http://[::ffff:127.0.0.1]/ http://[fe80::1]/ http://[fd00::1]/ http://[::]/
+      http://[::1]/ http://[::ffff:127.0.0.1]/ http://[::7f00:1]/ http://[fe80::1]/ http://[fd00::1]/ http://[::]/
     ].each do |url|
       SafeFetcher.resolver = ->(host) { host.end_with?(".internal.test") ? [ "192.168.1.10" ] : [ host ] }
       assert_raises(SafeFetcher::DisallowedAddress, url) { SafeFetcher.fetch(url) }
@@ -78,6 +78,26 @@ class SafeFetcherTest < ActiveSupport::TestCase
     end
   end
 
+  test "fails on malformed responses instead of crashing" do
+    stub_request(:get, "http://recipes.example.test/bad-redirect").to_return(status: 302, headers: { "Location" => "http://exa mple.test/" })
+    stub_request(:get, "http://recipes.example.test/bad-length").to_return(status: 200, body: "x", headers: { "Content-Length" => "abc" })
+    stub_request(:get, "http://recipes.example.test/bad-gzip").to_raise(Zlib::DataError)
+
+    %w[bad-redirect bad-length bad-gzip].each do |path|
+      assert_raises(SafeFetcher::FetchFailed, path) { SafeFetcher.fetch("http://recipes.example.test/#{path}") }
+    end
+  end
+
+  test "ignores proxy settings from the environment so the checked address is the one used" do
+    stub_request(:get, "http://recipes.example.test/pie").to_return(status: 200, body: "pie")
+    original = ENV["http_proxy"]
+    ENV["http_proxy"] = "http://10.0.0.1:3128"
+
+    assert_equal "pie", SafeFetcher.fetch("http://recipes.example.test/pie")
+  ensure
+    ENV["http_proxy"] = original
+  end
+
   test "fails on pages over the size limit, whether declared or streamed" do
     stub_request(:get, "http://recipes.example.test/declared")
       .to_return(status: 200, body: "small", headers: { "Content-Length" => (SafeFetcher::MAX_BYTES + 1).to_s })
@@ -99,6 +119,10 @@ class SafeFetcherTest < ActiveSupport::TestCase
     assert_raises(SafeFetcher::FetchFailed) { SafeFetcher.fetch("http://nope.example.test/") }
 
     SafeFetcher.resolver = ->(_host) { [] }
+    assert_raises(SafeFetcher::FetchFailed) { SafeFetcher.fetch("http://nope.example.test/") }
+
+    # Ruby's getaddrinfo raises ArgumentError when its timeout fires on macOS.
+    SafeFetcher.resolver = ->(_host) { raise ArgumentError, "NULL pointer given" }
     assert_raises(SafeFetcher::FetchFailed) { SafeFetcher.fetch("http://nope.example.test/") }
   end
 

@@ -11,6 +11,6 @@ module RecipesHelper
     hours, remainder = remainder.divmod(1.hour.to_i)
     minutes = remainder / 1.minute.to_i
     parts = { days:, hours:, minutes: }.filter_map { |unit, count| t("recipes.duration.#{unit}", count:) if count.positive? }
-    parts.presence&.to_sentence(words_connector: " ", two_words_connector: " ", last_word_connector: " ") || t("recipes.duration.minutes", count: 0)
+    parts.any? ? parts.join(" ") : t("recipes.duration.minutes", count: 0)
   end
 end

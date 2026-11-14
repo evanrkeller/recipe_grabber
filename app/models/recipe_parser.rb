@@ -18,7 +18,7 @@ class RecipeParser
       title: text(node["name"]),
       description: text(node["description"]),
       image_url: image_url(node["image"]),
-      yield: recipe_yield(node["recipeYield"]),
+      servings: servings(node["recipeYield"]),
       prep_time: duration(node["prepTime"]),
       cook_time: duration(node["cookTime"]),
       total_time: duration(node["totalTime"]),
@@ -60,14 +60,21 @@ class RecipeParser
         end
         nil
       when Hash
-        return value if Array(value["@type"]).include?("Recipe")
+        return value if type?(value, "Recipe")
 
         recipe_in(value.values)
       end
     end
 
+    # Matches "Recipe", "schema:Recipe", and "http://schema.org/Recipe".
+    def type?(node, name)
+      Array(node["@type"]).any? { |type| type.to_s.split(%r{[/:]}).last == name }
+    end
+
+    # JSON-LD may wrap a string as {"@value": "..."}; other objects aren't text.
     def text(value)
-      return if value.nil?
+      value = value["@value"] if value.is_a?(Hash)
+      return if value.nil? || value.is_a?(Hash) || value.is_a?(Array)
 
       Nokogiri::HTML.fragment(value.to_s).text.squish.presence
     end
@@ -88,7 +95,7 @@ class RecipeParser
 
     # Sites often give both a bare count and a phrase ("6", "6 servings");
     # the phrase reads better.
-    def recipe_yield(value)
+    def servings(value)
       values = list(value)
       values.find { |item| item.match?(/[[:alpha:]]/) } || values.first
     end
@@ -101,7 +108,7 @@ class RecipeParser
 
     def date(value)
       Date.parse(value.to_s)
-    rescue Date::Error
+    rescue Date::Error, ArgumentError # Date.parse raises ArgumentError for strings over 128 characters
       nil
     end
 
@@ -112,7 +119,7 @@ class RecipeParser
     def nutrition(value)
       return [] unless value.is_a?(Hash)
 
-      value.except("@type", "@context").filter_map do |key, amount|
+      value.reject { |key, _| key.start_with?("@") }.filter_map do |key, amount|
         amount = text(amount)
         "#{key.delete_suffix("Content").underscore.humanize}: #{amount}" if amount
       end
@@ -121,7 +128,7 @@ class RecipeParser
     def instructions(value)
       value = value.split("\n") if value.is_a?(String)
       items = Array.wrap(value)
-      sections, loose = items.partition { |item| item.is_a?(Hash) && item["@type"] == "HowToSection" }
+      sections, loose = items.partition { |item| item.is_a?(Hash) && type?(item, "HowToSection") }
 
       result = []
       result << Recipe::Section.new(name: nil, steps: steps(loose)) if loose.any?

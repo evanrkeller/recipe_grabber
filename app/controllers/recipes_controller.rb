@@ -1,5 +1,12 @@
 class RecipesController < ApplicationController
   MAX_LINKS = 10
+  RATE_LIMIT = 10
+  # Each grab fetches up to MAX_LINKS outside pages, so cap grabs per visitor.
+  # A process-local store keeps this working without a shared cache server.
+  RATE_LIMIT_STORE = ActiveSupport::Cache::MemoryStore.new
+
+  rate_limit to: RATE_LIMIT, within: 1.minute, only: :index, store: RATE_LIMIT_STORE,
+    with: -> { redirect_to root_path, alert: t("recipes.index.rate_limited") }
 
   def new
     @recipe_url = params[:recipe_url]

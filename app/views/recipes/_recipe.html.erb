@@ -8,7 +8,7 @@
   <% end %>
 
   <dl class="facts">
-    <dt><%= t(".yield") %></dt><dd><%= value_or_not_available(recipe.yield) %></dd>
+    <dt><%= t(".yield") %></dt><dd><%= value_or_not_available(recipe.servings) %></dd>
     <dt><%= t(".prep_time") %></dt><dd><%= value_or_not_available(duration_in_words(recipe.prep_time)) %></dd>
     <dt><%= t(".cook_time") %></dt><dd><%= value_or_not_available(duration_in_words(recipe.cook_time)) %></dd>
     <dt><%= t(".total_time") %></dt><dd><%= value_or_not_available(duration_in_words(recipe.total_time)) %></dd>

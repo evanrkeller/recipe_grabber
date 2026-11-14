@@ -12,7 +12,7 @@ class RecipeParserTest < ActiveSupport::TestCase
     assert_equal "Lemon Pancakes", recipe.title
     assert_equal "Thin pancakes with lemon and sugar.", recipe.description
     assert_equal "https://images.example.test/pancakes-440.jpg", recipe.image_url
-    assert_equal "Makes 12", recipe.yield
+    assert_equal "Makes 12", recipe.servings
     assert_equal 10.minutes, recipe.prep_time
     assert_equal 20.minutes, recipe.cook_time
     assert_equal 30.minutes, recipe.total_time
@@ -31,7 +31,7 @@ class RecipeParserTest < ActiveSupport::TestCase
 
     assert_equal "Weeknight Chili & Cornbread", recipe.title
     assert_equal "https://blog.example.test/chili-1x1.jpg", recipe.image_url
-    assert_equal "6 servings", recipe.yield
+    assert_equal "6 servings", recipe.servings
     assert_equal 75.minutes, recipe.total_time
     assert_equal [ "Chili", "To serve" ], recipe.instructions.map(&:name)
     assert_equal [ "Brown the beef with the onion.", "Add the beans and simmer for 45 minutes." ], recipe.instructions.first.steps
@@ -47,7 +47,7 @@ class RecipeParserTest < ActiveSupport::TestCase
 
     assert_equal "Banana Bread", recipe.title
     assert_equal "https://media.example.test/banana-bread.jpg", recipe.image_url
-    assert_equal "1 loaf", recipe.yield
+    assert_equal "1 loaf", recipe.servings
     assert_nil recipe.prep_time
     assert_nil recipe.cook_time
     assert_equal 65.minutes, recipe.total_time
@@ -78,7 +78,7 @@ class RecipeParserTest < ActiveSupport::TestCase
 
     assert_equal "Toast with butter", recipe.title
     assert_nil recipe.image_url
-    assert_equal "4", recipe.yield
+    assert_equal "4", recipe.servings
     assert_nil recipe.prep_time
     assert_nil recipe.published_on
     assert_equal [ "1 slice bread" ], recipe.ingredients
@@ -101,7 +101,28 @@ class RecipeParserTest < ActiveSupport::TestCase
     assert_equal "https://example.test/tea.jpg", recipe.image_url
     assert_equal [ "Steep for 3 minutes." ], recipe.instructions.first.steps
     assert_empty recipe.ingredients
-    assert_nil recipe.yield
+    assert_nil recipe.servings
+  end
+
+  test "accepts prefixed types, JSON-LD value objects, and ignores linked-data keys" do
+    html = <<~HTML
+      <script type="application/ld+json">
+      {"@type":"schema:Recipe","name":{"@value":"Porridge"},"description":{"@id":"#desc"},
+       "datePublished":"#{"2024" * 40}",
+       "recipeInstructions":[{"@type":["HowToSection"],"name":"Cook","itemListElement":["Simmer the oats."]}],
+       "nutrition":{"@type":"NutritionInformation","@id":"#nutrition","calories":"150 calories"}}
+      </script>
+    HTML
+
+    recipe = RecipeParser.new(html, source_url: "https://example.test").recipe
+
+    assert_equal "Porridge", recipe.title
+    assert_nil recipe.description
+    assert_nil recipe.published_on
+    assert_equal [ "Cook" ], recipe.instructions.map(&:name)
+    assert_equal [ "Calories: 150 calories" ], recipe.nutrition
+    full_url_type = %(<script type="application/ld+json">{"@type":"http://schema.org/Recipe","name":"Gruel"}</script>)
+    assert_equal "Gruel", RecipeParser.new(full_url_type, source_url: "https://example.test").recipe.title
   end
 
   test "has no instructions when the recipe provides none" do

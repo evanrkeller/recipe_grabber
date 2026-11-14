@@ -2,6 +2,7 @@ require "test_helper"
 
 class GrabRecipesTest < ActionDispatch::IntegrationTest
   setup do
+    RecipesController::RATE_LIMIT_STORE.clear
     @original_resolver = SafeFetcher.resolver
     SafeFetcher.resolver = ->(_host) { [ "93.184.216.34" ] }
     stub_request(:get, "https://food.example.test/pancakes").to_return(status: 200, body: recipe_fixture("plain_recipe"))

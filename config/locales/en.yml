@@ -24,6 +24,7 @@ en:
       grab_more: "Grab more recipes"
       empty: "Paste at least one recipe link."
       too_many: "You can grab up to %{count} recipes at a time."
+      rate_limited: "You're grabbing recipes too quickly. Please wait a minute and try again."
     recipe:
       untitled: "Untitled recipe"
       yield: "Yield:"

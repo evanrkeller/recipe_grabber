@@ -2,6 +2,7 @@ require "test_helper"
 
 class GrabErrorsTest < ActionDispatch::IntegrationTest
   setup do
+    RecipesController::RATE_LIMIT_STORE.clear
     @original_resolver = SafeFetcher.resolver
     SafeFetcher.resolver = ->(host) { host == "router.internal.test" ? [ "192.168.0.1" ] : [ "93.184.216.34" ] }
     stub_request(:get, "https://food.example.test/pancakes").to_return(status: 200, body: recipe_fixture("plain_recipe"))
@@ -64,6 +65,27 @@ class GrabErrorsTest < ActionDispatch::IntegrationTest
     get recipes_path, params: { recipe_url: "https://food.example.test/nameless" }
 
     assert_select "article.recipe h2", "Untitled recipe"
+  end
+
+  test "an unexpected failure on one link is reported as unreachable and the rest still display" do
+    stub_request(:get, "https://broken.example.test/pie").to_raise(RuntimeError.new("unexpected"))
+
+    get recipes_path, params: { recipe_url: "https://broken.example.test/pie\nhttps://food.example.test/pancakes" }
+
+    assert_response :success
+    assert_grab_error 0, "We couldn't reach that page.", "https://broken.example.test/pie"
+    assert_select "article.recipe h2", "Lemon Pancakes"
+  end
+
+  test "grabbing too often in a minute returns to the form with a message" do
+    RecipesController::RATE_LIMIT.times { get recipes_path, params: { recipe_url: "https://food.example.test/pancakes" } }
+    assert_response :success
+
+    get recipes_path, params: { recipe_url: "https://food.example.test/pancakes" }
+
+    assert_redirected_to root_path
+    follow_redirect!
+    assert_select ".flash-alert", "You're grabbing recipes too quickly. Please wait a minute and try again."
   end
 
   private
