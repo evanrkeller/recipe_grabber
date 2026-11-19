@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="<%= I18n.locale %>">
+  <head>
+    <title><%= content_for(:title) || t("app.name") %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="application-name" content="<%= t("app.name") %>">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= yield :head %>
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+    <%= stylesheet_link_tag :app %>
+  </head>
+
+  <body>
+    <header class="site-header">
+      <h1><%= link_to t("app.name"), root_path %></h1>
+    </header>
+
+    <main>
+      <% if alert %>
+        <p class="flash-alert" role="alert"><%= alert %></p>
+      <% end %>
+      <%= yield %>
+    </main>
+
+    <footer class="site-footer"><%= t("app.footer", year: Date.current.year) %></footer>
+  </body>
+</html>

@@ -1,5 +1,40 @@
-# Sample localization file for English. Add more files in this directory for other locales.
-# See http://github.com/svenfuchs/rails-i18n/tree/master/rails%2Flocale for starting points.
-
 en:
-  hello: "Hello world"
+  app:
+    name: "Keller Solutions Recipe Grabber"
+    footer: "© %{year} Keller Solutions"
+  recipes:
+    not_available: "N/A"
+    errors:
+      invalid_url: "That doesn't look like a web address."
+      disallowed_address: "That address isn't allowed."
+      unreachable: "We couldn't reach that page."
+      no_recipe: "We couldn't find a recipe on that page."
+    duration:
+      days:
+        one: "%{count} day"
+        other: "%{count} days"
+      hours: "%{count} hr"
+      minutes: "%{count} min"
+    new:
+      intro: "Paste links to recipes from almost any recipe site, one per line, and Recipe Grabber pulls out a clean copy of each."
+      recipe_links: "Recipe links"
+      grab_it: "Grab It"
+    index:
+      title: "Your recipes"
+      grab_more: "Grab more recipes"
+      empty: "Paste at least one recipe link."
+      too_many: "You can grab up to %{count} recipes at a time."
+      rate_limited: "You're grabbing recipes too quickly. Please wait a minute and try again."
+    recipe:
+      untitled: "Untitled recipe"
+      yield: "Yield:"
+      prep_time: "Prep Time:"
+      cook_time: "Cook Time:"
+      total_time: "Total Time:"
+      ingredients: "Ingredients"
+      directions: "Directions"
+      nutrition: "Nutrition"
+      author: "Author:"
+      publication: "Publication:"
+      published: "Published:"
+      view_original: "View original recipe"

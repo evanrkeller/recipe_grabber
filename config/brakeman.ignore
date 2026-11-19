@@ -1,0 +1,38 @@
+{
+  "ignored_warnings": [
+    {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 4,
+      "fingerprint": "3760ffd2e658c791124c8c3696edc1e12b38bd15288a2837b4c7521723fdd21e",
+      "check_name": "LinkToHref",
+      "message": "Potentially unsafe model attribute in `link_to` href",
+      "file": "app/views/recipes/_recipe.html.erb",
+      "line": 66,
+      "link": "https://brakemanscanner.org/docs/warning_types/link_to_href",
+      "code": "link_to(t(\".view_original\"), (Unresolved Model).new.source_url, :rel => \"noopener noreferrer nofollow\")",
+      "render_path": [
+        {
+          "type": "template",
+          "name": "recipes/index",
+          "line": 8,
+          "file": "app/views/recipes/index.html.erb",
+          "rendered": {
+            "name": "recipes/_recipe",
+            "file": "app/views/recipes/_recipe.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "recipes/_recipe"
+      },
+      "user_input": "(Unresolved Model).new.source_url",
+      "confidence": "Weak",
+      "cwe_id": [
+        79
+      ],
+      "note": "source_url is the visitor-supplied link, set on a Recipe only after SafeFetcher accepted it as an http(s) URL and fetched it, so it cannot carry a javascript: or data: scheme."
+    }
+  ],
+  "brakeman_version": "8.1.0"
+}
