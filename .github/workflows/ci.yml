@@ -22,7 +22,7 @@ jobs:
         run: bin/brakeman --no-pager
 
   bundle-audit:
-    uses: keller-solutions/.github/.github/workflows/bundle-audit.yml@v0.2.0
+    uses: keller-solutions/.github/.github/workflows/bundle-audit.yml@v0.2.1
 
   lint:
     runs-on: ubuntu-latest
