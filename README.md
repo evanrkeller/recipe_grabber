@@ -4,7 +4,7 @@ Paste links to recipes from almost any recipe site and get a clean copy of each 
 
 ## Setup
 
-Requires Ruby 4.0.9 (see `.ruby-version`). No database.
+Requires Ruby 4.0.10 (see `.ruby-version`). No database.
 
 ```sh
 bin/setup      # installs gems and starts the server at http://localhost:3000

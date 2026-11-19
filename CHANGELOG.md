@@ -11,12 +11,13 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Changed
 
-- Rebuilt on Ruby 4.0.9 and Rails 8.1 with a responsive, keyboard-accessible home page (#2)
+- Rebuilt on Ruby 4.0.10 and Rails 8.1 with a responsive, keyboard-accessible home page (#2)
 
 ### Security
 
 - Recipe links are fetched only over http(s) from public addresses, with redirect re-checks, timeouts, and a 2 MB cap; the legacy `Kernel#open` command-injection hole is gone (#3)
 - One deadline covers every redirect hop, environment proxies are ignored, and grabs are limited to 10 per minute per visitor (#4)
+- Ruby 4.0.10 for the Onigmo regexp and String case-conversion fixes; CI scans gems with the shared Keller Solutions bundle-audit workflow, which fails on any open advisory
 
 ### Removed
 
